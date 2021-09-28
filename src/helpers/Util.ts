@@ -1,7 +1,7 @@
-import { access, readdir, writeFile } from "fs/promises";
-import { readFile } from "fs";
+import { access, readFile, writeFile } from "fs/promises";
 import { join } from "path";
 import { Menu } from "../types/Menu";
+import { WeekDay } from "../types/WeekDay";
 
 const cachePath: string = join(__dirname, "../../cache");
 
@@ -17,54 +17,53 @@ export async function RemoveEmptyElements(array: any[]): Promise<any[]> {
 }
 
 /**
- * Caches menu.
+ * Caches menu by saving it to the cache directory.
  */
-/* TODO: Fix this.
 export async function CacheMenu(menu: Menu): Promise<void> {
-
-    if (await IsMenuCached(menu.GetWeekNumber())) return;
 
     const menuPath: string = join(cachePath, `menu-week-${menu.GetWeekNumber()}.json`);
 
     await writeFile(menuPath, JSON.stringify(menu))
         .then(() => console.log(`Cached menu: ${menuPath}`))
         .catch((err) => console.error(err));
-}*/
+}
 
 /**
  * Returns true if menu is cached.
  */
-/* TODO: Fix this.
 export async function IsMenuCached(weekNumber: number): Promise<boolean> {
-    await access(join(cachePath, `menu-week-${weekNumber}.json`))
-        .then(() => {
-            return true;
-        }).catch((err) => console.error(`This week's menu is not cached. ${err}`));
-    return false;
-}*/
+    const cachedMenuPath: string = join(cachePath, `menu-week-${weekNumber}.json`);
+    let isMenuCached: boolean = false;
+    await access(cachedMenuPath)
+        .then(() => isMenuCached = true)
+        .catch((err) => console.error("Menu is not cached"));
+    return isMenuCached;
+}
 
-/**
- * Takes weeknumber and tries to find cached menu.
- */
-/* TODO: Fix this.
-export async function GetMenuByWeek(weekNumber: number): Promise<Menu | void> {
-    if (!(await IsMenuCached(weekNumber))) return;
+export async function ParseJSONMenu(pathToMenu: string): Promise<Menu> {
 
-    let menu: Menu;
+    let jsonMenuObject: any;
 
-    try {
-        readFile(join(cachePath, `menu-week-${weekNumber}.json`), (err, data) => {
-            if (err) throw err;
-
-            const json = JSON.parse(data.toString());
-
-            menu = new Menu(json.weekNumber);
-            json.days.forEach(day => {
-                menu.AddDay(day);
-            });
+    await readFile(pathToMenu)
+        .then(data => {
+            jsonMenuObject = JSON.parse(data.toString());
+        }).catch(error => {
+            console.error(error);
         });
-    } catch (error) {
-        console.error(error);
+
+    const menu: Menu = new Menu(jsonMenuObject.weekNumber);
+    
+    const days = jsonMenuObject.days;
+
+    for (let i = 0; i < days.length; i++) {
+        menu.AddDay(new WeekDay(days[i].day, days[i].dishes));
     }
+
     return menu;
-}*/
+}
+
+export function GetWeekNumber(date: Date) {
+    const firstDayOfYear: Date = new Date(date.getFullYear(), 0, 1);
+    const pastDaysOfYear: number = (date.valueOf() - firstDayOfYear.valueOf()) / 86400000;
+    return Math.ceil((pastDaysOfYear + firstDayOfYear.getDay() + 1) / 7) - 1;
+}

@@ -5,8 +5,8 @@ import { LegitimateWeekDays, WeekDay } from "./WeekDay";
  */
 export class Menu {
     private weekNumber: number;
-    private days: WeekDay[];
     private year: number;
+    private days: WeekDay[];
 
     constructor(weekNumber: number) {
         this.weekNumber = weekNumber;

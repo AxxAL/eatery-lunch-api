@@ -1,19 +1,44 @@
 import axios, { AxiosResponse } from "axios";
-import { writeFile } from "fs";
-import { dirname, join } from "path";
+import { join } from "path";
 import { Menu } from "../types/Menu";
 import { WeekDay } from "../types/WeekDay";
-import { RemoveEmptyElements } from "./Util";
+import { CacheMenu, GetWeekNumber, IsMenuCached, ParseJSONMenu, RemoveEmptyElements } from "./Util";
 
 export const eateryApiUrl: string = "https://api.eatery.se/wp-json/eatery/v1/load";
 
 
 /**
  * Gets current week's menu & returns it.
- * @returns Menu
  */
 export async function GetWeekMenu(): Promise<Menu> {
-    const menu: Menu = await ParseSSISMenu();
+
+    const weekNumber: number = GetWeekNumber(new Date());
+    const pathToCachedMenu: string = join(__dirname, "../../cache", `menu-week-${weekNumber}.json`);
+
+    if (!(await IsMenuCached(weekNumber))) await ParseSSISMenu();
+    
+
+    const menu: Menu = await ParseJSONMenu(pathToCachedMenu);
+
+    return menu;
+}
+
+export async function GetDayMenu(day: number): Promise<WeekDay> {
+
+    const menu: Menu = await GetWeekMenu();
+
+    const weekDay: WeekDay = menu.GetDay(day);
+
+    return weekDay;
+}
+/**
+ * Takes weeknumber and returns cached menu.
+ */
+export async function GetMenuForWeek(weekNumber: number): Promise<Menu> {
+
+    const pathToMenu: string = join(__dirname, "../../cache", `menu-week-${weekNumber}.json`);
+    const menu: Menu = await ParseJSONMenu(pathToMenu);
+
     return menu;
 }
 
@@ -36,7 +61,7 @@ export async function GetDayMenu(day: string): Promise<WeekDay> {
 /**
  * Fetches eatery's weekly menu, parses it & returns it.
  */
-async function ParseSSISMenu(): Promise<Menu> {
+async function ParseSSISMenu(): Promise<void> {
 
     const request: AxiosResponse<any> = await axios.get(eateryApiUrl); // API request to eatery.
 
@@ -47,7 +72,7 @@ async function ParseSSISMenu(): Promise<Menu> {
 
     const weekNumber: number = response.content.title.replace( /^\D+/g, ''); // Get's week number.
 
-    const menu: Menu = new Menu(weekNumber);
+    const menu: Menu = new Menu(Number(weekNumber));
 
     for (let i = 0; i < content.length; i++) {
         content[i] = content[i].replace(/(<([^>]+)>)/ig, ""); // Removes all HTML tags in eatery content array.
@@ -56,7 +81,7 @@ async function ParseSSISMenu(): Promise<Menu> {
         menu.AddDay(new WeekDay(day[0], day.slice(1, day.length))); // Adds day to weekday array.
     } // Goes through eatery's menu and registeres weekdays.
     
-    menu.CleanMenu(); // Removes illigitimate weekdays.
+    await menu.CleanMenu(); // Removes illigitimate weekdays.
 
-    return menu;
+    await CacheMenu(menu); // Caches menu.
 }
