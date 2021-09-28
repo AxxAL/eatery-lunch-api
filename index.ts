@@ -1,3 +1,4 @@
+require("dotenv").config();
 import express, { Request, Response } from "express";
 import { Menu } from "./src/types/Menu";
 import { GetDayMenu, GetMenuForWeek, GetWeekMenu } from "./src/helpers/EateryAPI";
@@ -6,7 +7,7 @@ import { WeekDay } from "./src/types/WeekDay";
 import { join } from "path";
 
 const app = express();
-const port: number = 3333;
+const port: number = Number(process.env.PORT) || 3333;
 
 app.get("/", async (req, res) => {
     return res.sendFile(join(__dirname, "index.html"));
@@ -23,7 +24,7 @@ app.get("/menu/day/:index", async (req: Request, res: Response) => {
 
     const weekDay: WeekDay = await GetDayMenu(index);
 
-    if (weekDay == null) return res.status(400).send({ error: "Could not find menu." });
+    if (weekDay == null) return res.status(400).send({ error: "Index out of bounds." });
 
     return res.send(weekDay);
 });
@@ -39,6 +40,6 @@ app.get("/menu/week/:date", async (req: Request, res: Response) => {
     return res.send(weekMenu);
 });
 
-app.listen(3333, () => {
+app.listen(port, () => {
     console.log(`Application running at: http://localhost:${port}`);
 });
