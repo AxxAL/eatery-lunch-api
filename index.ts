@@ -12,12 +12,12 @@ app.get("/", async (req, res) => {
     return res.sendFile(join(__dirname, "index.html"));
 });
 
-app.get("/current", async (req: Request, res: Response) => {
+app.get("/menu", async (req: Request, res: Response) => {
     const weekMenu: Menu = await GetWeekMenu();
     return res.send(weekMenu);
 });
 
-app.get("/current/day/:index", async (req: Request, res: Response) => {
+app.get("/menu/day/:index", async (req: Request, res: Response) => {
 
     const index: number = Number(req.params.index);
 
@@ -28,16 +28,16 @@ app.get("/current/day/:index", async (req: Request, res: Response) => {
     return res.send(weekDay);
 });
 
-app.get("/week/:weekNumber", async (req: Request, res: Response) => {
+app.get("/menu/week/:date", async (req: Request, res: Response) => {
 
-    const weekNumber: number = Number(req.params.weekNumber);
+    const menuDate: string = req.params.date;
 
-    if (!(await IsMenuCached(weekNumber))) return res.status(400).send({ error: `Couldn't find menu matching week ${weekNumber}.` });
+    if (!(await IsMenuCached(menuDate))) return res.status(400).send({ error: `Couldn't find menu matching date ${menuDate}.` });
 
-    const weekMenu: Menu = await GetMenuForWeek(weekNumber);
+    const weekMenu: Menu = await GetMenuForWeek(menuDate);
 
     return res.send(weekMenu);
-}); 
+});
 
 app.listen(3333, () => {
     console.log(`Application running at: http://localhost:${port}`);

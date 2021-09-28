@@ -19,9 +19,10 @@
 </div>
     <div class="endpoint-list d-flex flex-column align-items-center">
         <h2>Endpoints</h2>
-        <div>Get menu for current week: <code>/current</code></div>
-        <div>Get menu for specific day in current week: <code>/current/day/[index]</code></div>
-        <div>Get menu for specific week: <code>/week/[week number]</code></div>
+        <div>Get menu for current week: <code>/menu</code></div>
+        <div>Get menu for specific day in current week: <code>/menu/day/[number]</code></div>
+        <div>Get menu for specific week: <code>/menu/week/[WW-YYYY]</code></div>
+        <p>All enpoints return a JSON response.</p>
     </div>
     </div>
 </body>
@@ -39,6 +40,11 @@
         white-space: pre;
         font-family: monospace;
         line-height: normal;
+    }
+    p {
+        font-size: 0.8rem;
+        margin: 0.4rem 0 0 0;
+        padding: 0;
     }
     .endpoint-list {
         border: 0.8px solid black;

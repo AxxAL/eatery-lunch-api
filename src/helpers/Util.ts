@@ -21,7 +21,7 @@ export async function RemoveEmptyElements(array: any[]): Promise<any[]> {
  */
 export async function CacheMenu(menu: Menu): Promise<void> {
 
-    const menuPath: string = join(cachePath, `menu-week-${menu.GetWeekNumber()}.json`);
+    const menuPath: string = join(cachePath, `menu-week-${menu.GetDate()}.json`);
 
     await writeFile(menuPath, JSON.stringify(menu))
         .then(() => console.log(`Cached menu: ${menuPath}`))
@@ -31,8 +31,8 @@ export async function CacheMenu(menu: Menu): Promise<void> {
 /**
  * Returns true if menu is cached.
  */
-export async function IsMenuCached(weekNumber: number): Promise<boolean> {
-    const cachedMenuPath: string = join(cachePath, `menu-week-${weekNumber}.json`);
+export async function IsMenuCached(menuDate: string): Promise<boolean> {
+    const cachedMenuPath: string = join(cachePath, `menu-week-${menuDate}.json`);
     let isMenuCached: boolean = false;
     await access(cachedMenuPath)
         .then(() => isMenuCached = true)
@@ -62,8 +62,12 @@ export async function ParseJSONMenu(pathToMenu: string): Promise<Menu> {
     return menu;
 }
 
-export function GetWeekNumber(date: Date) {
+export function GetWeekNumber(date: Date): number {
     const firstDayOfYear: Date = new Date(date.getFullYear(), 0, 1);
     const pastDaysOfYear: number = (date.valueOf() - firstDayOfYear.valueOf()) / 86400000;
     return Math.ceil((pastDaysOfYear + firstDayOfYear.getDay() + 1) / 7) - 1;
+}
+
+export function GetWeekDate(date: Date): string {
+    return `${GetWeekNumber(date)}-${date.getFullYear()}`;
 }

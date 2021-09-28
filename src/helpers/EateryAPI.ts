@@ -2,7 +2,7 @@ import axios, { AxiosResponse } from "axios";
 import { join } from "path";
 import { Menu } from "../types/Menu";
 import { WeekDay } from "../types/WeekDay";
-import { CacheMenu, GetWeekNumber, IsMenuCached, ParseJSONMenu, RemoveEmptyElements } from "./Util";
+import { CacheMenu, GetWeekDate, GetWeekNumber, IsMenuCached, ParseJSONMenu, RemoveEmptyElements } from "./Util";
 
 export const eateryApiUrl: string = "https://api.eatery.se/wp-json/eatery/v1/load";
 
@@ -12,10 +12,10 @@ export const eateryApiUrl: string = "https://api.eatery.se/wp-json/eatery/v1/loa
  */
 export async function GetWeekMenu(): Promise<Menu> {
 
-    const weekNumber: number = GetWeekNumber(new Date());
-    const pathToCachedMenu: string = join(__dirname, "../../cache", `menu-week-${weekNumber}.json`);
+    const weekDate: string = GetWeekDate(new Date());
+    const pathToCachedMenu: string = join(__dirname, "../../cache", `menu-week-${weekDate}.json`);
 
-    if (!(await IsMenuCached(weekNumber))) await ParseSSISMenu();
+    if (!(await IsMenuCached(weekDate))) await ParseSSISMenu();
     
 
     const menu: Menu = await ParseJSONMenu(pathToCachedMenu);
@@ -34,9 +34,9 @@ export async function GetDayMenu(day: number): Promise<WeekDay> {
 /**
  * Takes weeknumber and returns cached menu.
  */
-export async function GetMenuForWeek(weekNumber: number): Promise<Menu> {
+export async function GetMenuForWeek(weekDate: string): Promise<Menu> {
 
-    const pathToMenu: string = join(__dirname, "../../cache", `menu-week-${weekNumber}.json`);
+    const pathToMenu: string = join(__dirname, "../../cache", `menu-week-${weekDate}.json`);
     const menu: Menu = await ParseJSONMenu(pathToMenu);
 
     return menu;

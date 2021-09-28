@@ -45,10 +45,10 @@ export class Menu {
     }
 
     /**
-     * Returns weeknumber of menu.
+     * Returns weeknumber of menu. Format [WW-YYYY]
      */
-    public GetWeekNumber(): number {
-        return this.weekNumber;
+    public GetDate(): string {
+        return `${this.weekNumber}-${this.year}`;
     }
 
     /**
