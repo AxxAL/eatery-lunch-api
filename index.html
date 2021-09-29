@@ -17,16 +17,26 @@
 ███████║███████║██║███████║    ███████╗╚██████╔╝██║ ╚████║╚██████╗██║  ██║    ██║  ██║██║     ██║
 ╚══════╝╚══════╝╚═╝╚══════╝    ╚══════╝ ╚═════╝ ╚═╝  ╚═══╝ ╚═════╝╚═╝  ╚═╝    ╚═╝  ╚═╝╚═╝     ╚═╝
 </div>
-    <div class="endpoint-list d-flex flex-column align-items-center">
-        <h2>Endpoints</h2>
-        <div>Get menu for current week: <code>/menu</code></div>
-        <div>Get menu for specific day in current week: <code>/menu/day/[number]</code></div>
-        <div>Get menu for specific week: <code>/menu/week/[WW-YYYY]</code></div>
-        <p>All endpoints return a JSON response.</p>
-    </div>
+        <div class="endpoint-list d-flex flex-column align-items-center" id="endpoint-list">
+            <h2>Endpoints</h2>
+            <div>Get menu for current week: <code>/menu</code></div>
+            <div>Get menu for specific day in current week: <code>/menu/day/[number]</code></div>
+            <div>Get menu for specific week: <code>/menu/week/[WW-YYYY]</code></div>
+            <p>All endpoints return a JSON response.</p>
+        </div>
     </div>
 </body>
 </html>
+
+<script>
+    fetch("http://localhost:3333/stats/requests")
+        .then(response => response.json())
+        .then(data => {
+            const list = document.getElementById("endpoint-list");
+            list.innerHTML += `<p>Requests since restart: ${data.requestCount}</p>`;
+        })
+        .catch(err => console.log(err));
+</script>
 
 <style>
     body {

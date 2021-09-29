@@ -5,6 +5,8 @@ import { GetDayMenu, GetMenuForWeek, GetWeekMenu } from "./src/helpers/EateryAPI
 import { IsMenuCached } from "./src/helpers/Util";
 import { WeekDay } from "./src/types/WeekDay";
 import { join } from "path";
+import { GetRequestCount, IncrementRequests } from "./src/Statistics";
+import cors from "cors";
 
 const app = express();
 const port: number = Number(process.env.PORT) || 3333;
@@ -15,6 +17,7 @@ app.get("/", async (req, res) => {
 
 app.get("/menu", async (req: Request, res: Response) => {
     const weekMenu: Menu = await GetWeekMenu();
+    IncrementRequests();
     return res.send(weekMenu);
 });
 
@@ -25,7 +28,7 @@ app.get("/menu/day/:index", async (req: Request, res: Response) => {
     const weekDay: WeekDay = await GetDayMenu(index);
 
     if (weekDay == null) return res.status(400).send({ error: "Index out of bounds." });
-
+    IncrementRequests();
     return res.send(weekDay);
 });
 
@@ -36,8 +39,13 @@ app.get("/menu/week/:date", async (req: Request, res: Response) => {
     if (!(await IsMenuCached(menuDate))) return res.status(400).send({ error: `Couldn't find menu matching date ${menuDate}.` });
 
     const weekMenu: Menu = await GetMenuForWeek(menuDate);
-
+    IncrementRequests();
     return res.send(weekMenu);
+});
+
+app.get("/stats/requests", cors(), (req: Request, res: Response) => {
+    const requestCount: number = GetRequestCount();
+    return res.send({ requestCount });
 });
 
 app.listen(port, () => {
