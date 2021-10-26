@@ -48,6 +48,8 @@ app.get("/stats/requests", cors(), (req: Request, res: Response) => {
     return res.send({ requestCount });
 });
 
+app.get("*", async (req: Request, res: Response) => res.status(404).send({ error: "Page not found." }) );
+
 app.listen(port, () => {
     console.log(`Application running at: http://localhost:${port}`);
 });
