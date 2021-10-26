@@ -76,6 +76,7 @@ async function ParseSSISMenu(): Promise<void> {
 
     for (let i = 0; i < content.length; i++) {
         content[i] = content[i].replace(/(<([^>]+)>)/ig, ""); // Removes all HTML tags in eatery content array.
+        content[i] = content[i].replace(/&amp;/g, "&"); // Formats ampersands.
         let day: string[] = content[i].split("\n"); // Splits eatery day into weekday and dishes. ex. ["Måndag", "Lax", "Köttbullar", "Pastasallad"]
         day = await RemoveEmptyElements(day); // Removes empty items from array
         menu.AddDay(new WeekDay(day[0], day.slice(1, day.length))); // Adds day to weekday array.

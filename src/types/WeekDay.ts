@@ -8,6 +8,16 @@ export class WeekDay {
     constructor(day: string, dishes: string[]) {
         this.day = day.toLowerCase();
         this.dishes = dishes;
+        this.CleanDishes();
+    }
+
+    /**
+     * Cleans up dishes. (Replaces unicode chars etc.)
+     */
+    private CleanDishes() {
+        for (let i = 0; i < this.dishes.length; i++) {
+            this.dishes[i] = this.dishes[i].replace("&#8211;", "-").toLowerCase();
+        }
     }
 }
 
