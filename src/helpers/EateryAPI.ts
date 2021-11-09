@@ -1,8 +1,9 @@
 import axios, { AxiosResponse } from "axios";
+import { DateTime } from "luxon";
 import { join } from "path";
 import { Menu } from "../types/Menu";
 import { WeekDay } from "../types/WeekDay";
-import { CacheMenu, GetWeekDate, GetWeekNumber, IsMenuCached, ParseJSONMenu, RemoveEmptyElements } from "./Util";
+import { CacheMenu, GetWeekDate, IsMenuCached, ParseJSONMenu, RemoveEmptyElements } from "./Util";
 
 export const eateryApiUrl: string = "https://api.eatery.se/wp-json/eatery/v1/load";
 
@@ -12,7 +13,8 @@ export const eateryApiUrl: string = "https://api.eatery.se/wp-json/eatery/v1/loa
  */
 export async function GetWeekMenu(): Promise<Menu> {
 
-    const weekDate: string = GetWeekDate(new Date());
+    const weekDate: string = GetWeekDate(DateTime.now());
+    
     const pathToCachedMenu: string = join(__dirname, "../../cache", `menu-week-${weekDate}.json`);
 
     if (!(await IsMenuCached(weekDate))) await ParseSSISMenu();
@@ -72,7 +74,7 @@ async function ParseSSISMenu(): Promise<void> {
 
     const weekNumber: number = response.content.title.replace( /^\D+/g, ''); // Get's week number.
 
-    const menu: Menu = new Menu(Number(weekNumber));
+    const menu: Menu = new Menu(DateTime.now().weekNumber);
 
     for (let i = 0; i < content.length; i++) {
         content[i] = content[i].replace(/(<([^>]+)>)/ig, ""); // Removes all HTML tags in eatery content array.

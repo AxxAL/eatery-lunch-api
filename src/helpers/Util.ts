@@ -1,4 +1,5 @@
 import { access, readFile, writeFile } from "fs/promises";
+import { DateTime } from "luxon";
 import { join } from "path";
 import { Menu } from "../types/Menu";
 import { WeekDay } from "../types/WeekDay";
@@ -62,12 +63,6 @@ export async function ParseJSONMenu(pathToMenu: string): Promise<Menu> {
     return menu;
 }
 
-export function GetWeekNumber(date: Date): number {
-    const firstDayOfYear: Date = new Date(date.getFullYear(), 0, 1);
-    const pastDaysOfYear: number = (date.valueOf() - firstDayOfYear.valueOf()) / 86400000;
-    return Math.ceil((pastDaysOfYear + firstDayOfYear.getDay() + 1) / 7) - 1;
-}
-
-export function GetWeekDate(date: Date): string {
-    return `${GetWeekNumber(date)}-${date.getFullYear()}`;
+export function GetWeekDate(date: DateTime): string {
+    return `${date.weekNumber}-${date.year}`;
 }
