@@ -18,7 +18,6 @@ export async function GetWeekMenu(): Promise<Menu> {
     const pathToCachedMenu: string = join(__dirname, "../../cache", `menu-week-${weekDate}.json`);
 
     if (!(await IsMenuCached(weekDate))) await ParseSSISMenu();
-    
 
     const menu: Menu = await ParseJSONMenu(pathToCachedMenu);
 
@@ -33,6 +32,7 @@ export async function GetDayMenu(day: number): Promise<WeekDay> {
 
     return weekDay;
 }
+
 /**
  * Takes weeknumber and returns cached menu.
  */
@@ -45,34 +45,18 @@ export async function GetMenuForWeek(weekDate: string): Promise<Menu> {
 }
 
 /**
- * Gets specified day's menu.
- */
-/* TODO: Fix this.
-export async function GetDayMenu(day: string): Promise<WeekDay> {
-    const weekMenu: Menu = await GetWeekMenu();
-    let dailyMenu: WeekDay;
-    
-    for (let i = 0; i < weekMenu.Count(); i++) {
-        if (weekMenu.GetDay(i).day == day) {
-            dailyMenu = weekMenu.GetDay(i);
-        }
-    }
-    return dailyMenu;
-}*/
-
-/**
  * Fetches eatery's weekly menu, parses it & returns it.
  */
 async function ParseSSISMenu(): Promise<void> {
 
     const request: AxiosResponse<any> = await axios.get(eateryApiUrl); // API request to eatery.
 
-    const response = request.data.menues["521"]; // Get's Kista NOD's specific lunch menu from api request.
+    const response = request.data.menues["521"]; // Gets Kista NOD's specific lunch menu from api request.
     
     let content: string[] = response.content.content.split("<p>"); // Splits eatery's menu into days.
     content = await RemoveEmptyElements(content); // Removes all empty elements.
 
-    const weekNumber: number = response.content.title.replace( /^\D+/g, ''); // Get's week number.
+    const weekNumber: number = response.content.title.replace( /^\D+/g, ''); // Gets week number.
 
     const menu: Menu = new Menu(DateTime.now().weekNumber);
 
