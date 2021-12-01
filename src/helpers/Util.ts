@@ -1,4 +1,4 @@
-import { access, readFile, writeFile } from "fs/promises";
+import { access, readFile, writeFile, mkdir } from "fs/promises";
 import { DateTime } from "luxon";
 import { join } from "path";
 import { Menu } from "../types/Menu";
@@ -21,6 +21,14 @@ export async function RemoveEmptyElements(array: any[]): Promise<any[]> {
  * Caches menu by saving it to the cache directory.
  */
 export async function CacheMenu(menu: Menu): Promise<void> {
+
+    // Makes sure cache directory exists.
+    await access(cachePath)
+        .catch(async () => {
+            console.log("Creating cache directory.");
+            await mkdir(cachePath)
+                .catch(err => console.error(err));
+        });
 
     const menuPath: string = join(cachePath, `menu-week-${menu.GetDate()}.json`);
 
