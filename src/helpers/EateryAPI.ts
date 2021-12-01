@@ -7,7 +7,6 @@ import { CacheMenu, GetWeekDate, IsMenuCached, ParseJSONMenu, RemoveEmptyElement
 
 export const eateryApiUrl: string = "https://api.eatery.se/wp-json/eatery/v1/load";
 
-
 /**
  * Gets current week's menu & returns it.
  */

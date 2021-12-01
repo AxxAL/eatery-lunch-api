@@ -7,9 +7,16 @@ import { WeekDay } from "./src/types/WeekDay";
 import { join } from "path";
 import { GetRequestCount, IncrementRequests } from "./src/Statistics";
 import cors from "cors";
+import { createMenuTable } from "./src/helpers/DatabaseHelper";
 
 const app = express();
 const port: number = Number(process.env.PORT) || 3333;
+
+app.get("/database", async (req, res) => {
+    try {
+        await createMenuTable();
+    } catch(err) { console.log(err) }
+});
 
 app.get("/", async (req, res) => {
     return res.sendFile(join(__dirname, "index.html"));
