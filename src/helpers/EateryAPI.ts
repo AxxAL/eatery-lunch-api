@@ -83,8 +83,6 @@ async function ParseSSISMenu(): Promise<void> {
         day = await RemoveEmptyElements(day); // Removes empty items from array
         menu.AddDay(new WeekDay(day[0], day.slice(1, day.length))); // Adds day to weekday array.
     } // Goes through eatery's menu and registeres weekdays.
-    
-    await menu.CleanMenu(); // Removes illigitimate weekdays.
 
     await CacheMenu(menu); // Caches menu.
 }

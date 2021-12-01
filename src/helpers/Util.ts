@@ -37,7 +37,7 @@ export async function IsMenuCached(menuDate: string): Promise<boolean> {
     let isMenuCached: boolean = false;
     await access(cachedMenuPath)
         .then(() => isMenuCached = true)
-        .catch((err) => console.error("Menu is not cached"));
+        .catch(() => console.error("Menu is not cached"));
     return isMenuCached;
 }
 
