@@ -3,6 +3,7 @@ import { DateTime } from "luxon";
 import { join } from "path";
 import { Menu } from "../types/Menu";
 import { WeekDay } from "../types/WeekDay";
+import { saveMenu } from "./DatabaseHelper";
 import { CacheMenu, GetWeekDate, IsMenuCached, ParseJSONMenu, RemoveEmptyElements } from "./Util";
 
 export const eateryApiUrl: string = "https://api.eatery.se/wp-json/eatery/v1/load";
@@ -46,7 +47,7 @@ export async function GetMenuForWeek(weekDate: string): Promise<Menu> {
 /**
  * Fetches eatery's weekly menu, parses it & returns it.
  */
-async function ParseSSISMenu(): Promise<void> {
+export async function ParseSSISMenu(): Promise<void> {
 
     const request: AxiosResponse<any> = await axios.get(eateryApiUrl); // API request to eatery.
 
@@ -55,9 +56,8 @@ async function ParseSSISMenu(): Promise<void> {
     let content: string[] = response.content.content.split("<p>"); // Splits eatery's menu into days.
     content = await RemoveEmptyElements(content); // Removes all empty elements.
 
-    const weekNumber: number = response.content.title.replace( /^\D+/g, ''); // Gets week number.
-
-    const menu: Menu = new Menu(DateTime.now().weekNumber);
+    const now: DateTime = DateTime.now();
+    const menu: Menu = new Menu(now.weekNumber, now.year);
 
     for (let i = 0; i < content.length; i++) {
         content[i] = content[i].replace(/(<([^>]+)>)/ig, ""); // Removes all HTML tags in eatery content array.
@@ -67,5 +67,5 @@ async function ParseSSISMenu(): Promise<void> {
         menu.AddDay(new WeekDay(day[0], day.slice(1, day.length))); // Adds day to weekday array.
     } // Goes through eatery's menu and registeres weekdays.
 
-    await CacheMenu(menu); // Caches menu.
+    await saveMenu(menu); // Saves menu to database.
 }
