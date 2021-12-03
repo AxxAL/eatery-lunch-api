@@ -34,6 +34,7 @@ npm-debug.log
 
 # User specific
 .env
+config.ts
 files
 tmp
 cache
