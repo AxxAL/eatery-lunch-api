@@ -1,31 +1,44 @@
-require("dotenv").config();
+import config from "./config";
 import express, { Request, Response } from "express";
 import { Menu } from "./src/types/Menu";
-import { GetDayMenu, GetMenuForWeek, GetWeekMenu } from "./src/helpers/EateryAPI";
-import { IsMenuCached } from "./src/helpers/Util";
+import { ParseSSISMenu } from "./src/helpers/EateryAPI";
 import { WeekDay } from "./src/types/WeekDay";
 import { join } from "path";
 import { GetRequestCount, IncrementRequests } from "./src/Statistics";
 import cors from "cors";
+import { getMenu, isMenuSaved } from "./src/helpers/DatabaseHelper";
+import { DateTime } from "luxon";
 
 const app = express();
-const port: number = Number(process.env.PORT) || 3333;
+const port: number = Number(config.port) || 3333;
 
-app.get("/", async (req, res) => {
+app.get("/", async (req: Request, res: Response) => {
     return res.sendFile(join(__dirname, "index.html"));
 });
 
 app.get("/menu", async (req: Request, res: Response) => {
-    const weekMenu: Menu = await GetWeekMenu();
-    IncrementRequests();
-    return res.send(weekMenu);
+    try {
+        const now: DateTime = DateTime.now();
+        
+        if (!await isMenuSaved(now.weekNumber, now.year)) {
+            await ParseSSISMenu();
+        }
+
+        const weekMenu: Menu = await getMenu(now.weekNumber, now.year);
+        IncrementRequests();
+        return res.send(weekMenu);
+    } catch(err) {
+        console.log(err);
+    }  
 });
 
 app.get("/menu/day/:index", async (req: Request, res: Response) => {
 
     const index: number = Number(req.params.index);
 
-    const weekDay: WeekDay = await GetDayMenu(index);
+    const now: DateTime = DateTime.now();
+    const weekMenu: Menu = await getMenu(now.weekNumber, now.year);
+    const weekDay: WeekDay = weekMenu.GetDay(index);
 
     if (weekDay == null) return res.status(400).send({ error: "Index out of bounds." });
     IncrementRequests();
@@ -33,12 +46,20 @@ app.get("/menu/day/:index", async (req: Request, res: Response) => {
 });
 
 app.get("/menu/week/:date", async (req: Request, res: Response) => {
+    const params: string[] = req.params.date.split("-");
 
-    const menuDate: string = req.params.date;
+    if (params.length > 2) {
+        return res.status(400).send({ error: "Incorrect date format." });
+    }
 
-    if (!(await IsMenuCached(menuDate))) return res.status(400).send({ error: `Couldn't find menu matching date ${menuDate}.` });
+    const week: number = Number(params[0]);
+    const year: number = Number(params[1]);
 
-    const weekMenu: Menu = await GetMenuForWeek(menuDate);
+    if (!await isMenuSaved(week, year)) {
+        return res.status(400).send({ error: `Couldn't find menu matching date ${week}-${year}.` });
+    }
+
+    const weekMenu: Menu = await getMenu(week, year);
     IncrementRequests();
     return res.send(weekMenu);
 });

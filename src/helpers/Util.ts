@@ -60,7 +60,7 @@ export async function ParseJSONMenu(pathToMenu: string): Promise<Menu> {
             console.error(error);
         });
 
-    const menu: Menu = new Menu(jsonMenuObject.weekNumber);
+    const menu: Menu = new Menu(jsonMenuObject.weekNumber, jsonMenuObject.year);
     
     const days = jsonMenuObject.days;
 

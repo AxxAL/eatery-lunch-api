@@ -8,9 +8,9 @@ export class Menu {
     private year: number;
     private days: WeekDay[];
 
-    constructor(weekNumber: number) {
+    constructor(weekNumber: number, year: number) {
         this.weekNumber = weekNumber;
-        this.year = new Date().getFullYear();
+        this.year = year;
         this.days = [];
     }
 
@@ -57,6 +57,13 @@ export class Menu {
      */
     public GetYear(): number {
         return this.year;
+    }
+
+    /**
+     * Returns weeknumber of menu.
+     */
+    public GetWeek(): number {
+        return this.weekNumber;
     }
 
     /**
