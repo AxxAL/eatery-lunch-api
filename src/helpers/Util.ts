@@ -74,3 +74,7 @@ export async function ParseJSONMenu(pathToMenu: string): Promise<Menu> {
 export function GetWeekDate(date: DateTime): string {
     return `${date.weekNumber}-${date.year}`;
 }
+
+export function capitalizeFirstLetter(string: string): string {
+    return string.charAt(0).toUpperCase() + string.slice(1);
+}

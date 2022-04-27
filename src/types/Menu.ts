@@ -1,3 +1,4 @@
+import { capitalizeFirstLetter } from "../helpers/Util";
 import { LegitimateWeekDays, WeekDay } from "./WeekDay";
 
 /**
@@ -20,6 +21,7 @@ export class Menu {
     public AddDay(day: WeekDay): boolean {
         try {
             if (!LegitimateWeekDays.includes(day.day)) return false;
+            day.day = capitalizeFirstLetter(day.day);
             this.days.push(day);
             return true;
         } catch (error) {

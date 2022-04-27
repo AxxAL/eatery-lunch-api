@@ -1,9 +1,7 @@
-import { Collection, Db, MongoClient, WithId } from "mongodb";
+import { Collection, Db, MongoClient } from "mongodb";
 import { Menu } from "../types/Menu";
-import config from "../../config";
-import { ParseSSISMenu } from "./EateryAPI";
 
-const client: MongoClient = new MongoClient(config.databaseUri);
+const client: MongoClient = new MongoClient(process.env.DATABASE_URI as string);
 
 export async function isMenuSaved(weekNumber: number, year: number): Promise<boolean> {
     await client.connect();
@@ -26,6 +24,9 @@ export async function saveMenu(menu: Menu) {
 
         console.log(`Saved menu for week ${menu.GetWeek()} to database! Document ID: ${result.insertedId}`);
 
+    } catch(error) {
+        console.log(error);
+        throw new Error("Could not save menu to database.");
     } finally {
         await client.close();
     }
