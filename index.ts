@@ -62,7 +62,7 @@ app.get("/menu/day/:index", async (req: Request, res: Response) => {
 app.get("/menu/week/:date", async (req: Request, res: Response) => {
     const params: string[] = req.params.date.split("-");
 
-    if (params.length > 2) {
+    if (params.length > 2 || params.length < 2) {
         return res.status(400).send({ error: "Incorrect date format." });
     }
 
