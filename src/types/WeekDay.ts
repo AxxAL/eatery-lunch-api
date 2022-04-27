@@ -16,7 +16,9 @@ export class WeekDay {
      */
     private CleanDishes() {
         for (let i = 0; i < this.dishes.length; i++) {
-            this.dishes[i] = this.dishes[i].replace("&#8211;", "-").toLowerCase();
+            this.dishes[i].toLowerCase();
+            this.dishes[i] = this.dishes[i].replace("&#8211;", "-");
+            this.dishes[i] = this.dishes[i].replace("&#8217;", "'");
         }
     }
 }

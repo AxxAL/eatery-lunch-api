@@ -21,6 +21,7 @@ coverage
 
 # Compiled binary addons (http://nodejs.org/api/addons.html)
 build/Release
+build/
 
 # Dependency directory
 # https://docs.npmjs.com/cli/shrinkwrap#caveats
@@ -33,6 +34,7 @@ npm-debug.log
 
 # User specific
 .env
+config.ts
 files
 tmp
 cache

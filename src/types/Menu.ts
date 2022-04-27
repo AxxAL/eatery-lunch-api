@@ -1,3 +1,4 @@
+import { capitalizeFirstLetter } from "../helpers/Util";
 import { LegitimateWeekDays, WeekDay } from "./WeekDay";
 
 /**
@@ -8,9 +9,9 @@ export class Menu {
     private year: number;
     private days: WeekDay[];
 
-    constructor(weekNumber: number) {
+    constructor(weekNumber: number, year: number) {
         this.weekNumber = weekNumber;
-        this.year = new Date().getFullYear();
+        this.year = year;
         this.days = [];
     }
 
@@ -19,6 +20,8 @@ export class Menu {
      */
     public AddDay(day: WeekDay): boolean {
         try {
+            if (!LegitimateWeekDays.includes(day.day)) return false;
+            day.day = capitalizeFirstLetter(day.day);
             this.days.push(day);
             return true;
         } catch (error) {
@@ -56,6 +59,13 @@ export class Menu {
      */
     public GetYear(): number {
         return this.year;
+    }
+
+    /**
+     * Returns weeknumber of menu.
+     */
+    public GetWeek(): number {
+        return this.weekNumber;
     }
 
     /**

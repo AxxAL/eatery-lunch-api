@@ -1,54 +1,83 @@
-require("dotenv").config();
+import "dotenv/config";
 import express, { Request, Response } from "express";
 import { Menu } from "./src/types/Menu";
-import { GetDayMenu, GetMenuForWeek, GetWeekMenu } from "./src/helpers/EateryAPI";
-import { IsMenuCached } from "./src/helpers/Util";
+import { ParseSSISMenu } from "./src/helpers/EateryAPI";
 import { WeekDay } from "./src/types/WeekDay";
 import { join } from "path";
-import { GetRequestCount, IncrementRequests } from "./src/Statistics";
-import cors from "cors";
+import { getMenu, isMenuSaved } from "./src/helpers/DatabaseHelper";
+import { DateTime } from "luxon";
 
 const app = express();
-const port: number = Number(process.env.PORT) || 3333;
+const port = parseInt(process.env.PORT as string) || 3333;
 
-app.get("/", async (req, res) => {
+app.get("/", async (req: Request, res: Response) => {
     return res.sendFile(join(__dirname, "index.html"));
 });
 
 app.get("/menu", async (req: Request, res: Response) => {
-    const weekMenu: Menu = await GetWeekMenu();
-    IncrementRequests();
-    return res.send(weekMenu);
+    let menu: Menu;
+    try {
+        const now: DateTime = DateTime.now();
+        
+        if (!await isMenuSaved(now.weekNumber, now.year)) {
+            await ParseSSISMenu();
+        }
+
+        menu = await getMenu(now.weekNumber, now.year);
+
+        res.send(menu);
+    } catch(err) {
+        res.send({ error: "Could not find this week's menu." })
+        console.log(err);
+        return;
+    }  
 });
 
 app.get("/menu/day/:index", async (req: Request, res: Response) => {
 
-    const index: number = Number(req.params.index);
+    const index: number = parseInt(req.params.index);
 
-    const weekDay: WeekDay = await GetDayMenu(index);
+    const now: DateTime = DateTime.now();
+    
+    let menu: Menu;
 
-    if (weekDay == null) return res.status(400).send({ error: "Index out of bounds." });
-    IncrementRequests();
-    return res.send(weekDay);
+    try {
+        menu = await getMenu(now.weekNumber, now.year);
+    } catch(error) {
+        res.send({ error: "Could not find this week's menu." })
+        console.log(error);
+        return;
+    }
+
+    try {
+        const weekDay: WeekDay = menu.GetDay(index);
+        return res.send(weekDay);
+    } catch(error) {
+        res.send({ error: "Could not fetch specified day." })
+        console.log(error);
+        return;
+    }
 });
 
 app.get("/menu/week/:date", async (req: Request, res: Response) => {
+    const params: string[] = req.params.date.split("-");
 
-    const menuDate: string = req.params.date;
+    if (params.length > 2) {
+        return res.status(400).send({ error: "Incorrect date format." });
+    }
 
-    if (!(await IsMenuCached(menuDate))) return res.status(400).send({ error: `Couldn't find menu matching date ${menuDate}.` });
+    const week: number = parseInt(params[0]);
+    const year: number = parseInt(params[1]);
 
-    const weekMenu: Menu = await GetMenuForWeek(menuDate);
-    IncrementRequests();
+    if (!await isMenuSaved(week, year)) {
+        return res.status(400).send({ error: `Couldn't find menu matching date ${week}-${year}.` });
+    }
+
+    const weekMenu: Menu = await getMenu(week, year);
     return res.send(weekMenu);
 });
 
-app.get("/stats/requests", cors(), (req: Request, res: Response) => {
-    const requestCount: number = GetRequestCount();
-    return res.send({ requestCount });
-});
-
-app.get("*", async (req: Request, res: Response) => res.status(404).send({ error: "Page not found." }) );
+app.get("*", async (req: Request, res: Response) => res.status(404).send({ error: "Endpoint does not exist." }) );
 
 app.listen(port, () => {
     console.log(`Application running at: http://localhost:${port}`);
